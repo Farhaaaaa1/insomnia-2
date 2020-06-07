@@ -30,7 +30,8 @@ public class hello {
     public static String extractUrls(String text) {
         if (extractNumberOfUrls(text) == 1) {
             List<String> containedUrls = new ArrayList<String>();
-            String urlRegex = "((https?|ftp|gopher|telnet|file):((//)|(\\\\))+[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]*)";
+            String urlRegex;
+            urlRegex = "((https?|ftp|gopher|telnet|file):((//)|(\\\\))+[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]*)";
             Pattern pattern = Pattern.compile(urlRegex, Pattern.CASE_INSENSITIVE);
             Matcher urlMatcher = pattern.matcher(text);
             while (urlMatcher.find()) {
@@ -59,10 +60,9 @@ public class hello {
         List<String> myStrList = Arrays.asList(mystr);
         if (myStrList.contains(word1)) ;
 
-
     }
 
-  static   public String replacer(String string) {
+    static public String replacer(String string) {
         string = string.replaceAll(" --headers ", " -H ");
         string = string.replaceAll(" --method ", " -M ");
         string = string.replaceAll(" --output ", " -O ");
@@ -72,41 +72,63 @@ public class hello {
         return string;
     }
 
-    public String getWord(String string) {
-        string = string.replaceAll("\\s{2,}", " ").trim();
-        return string;
+    static public String getNextWord(String string, String word) {
+        String[] mystr = string.split(" ");
+        int index;
+        List<String> myStrList = Arrays.asList(mystr);
+        if (myStrList.contains(word)) {
+            index = myStrList.indexOf(word);
+            if (index != myStrList.size() - 1)
+                if (!legalList.contains(myStrList.get(++index)))
+                    return myStrList.get(index);
+        }
+        return null;
     }
 
-   static public void amadeSazi(String string) {
+    static public void amadeSazi(String string) {
+        String url;
         string = string.replaceAll("\\s{2,}", " ").trim();
-        string = " "+string+" ";
-       System.out.println(string);
+        string = " " + string + " ";
+        //System.out.println(string);
         string = replacer(string);
         // removing sapces from first and last
-        string = string.substring(1,string.length()-1);
-       System.out.println(string);
-
+        string = string.substring(1, string.length() - 1);
+        //System.out.println(string);
+        duplicated(string);
+        url = extractUrls(string);
+        System.out.println("url : " + url);
+        getWords(string);
+        //System.out.println("new word : "+getNextWord(string,"-i"));
     }
 
-    public static void method(String string) {
-        int n = 999;
+    public static void getWords(String string) {
         String[] mystr = string.split(" ");
-        for (String a :
-                mystr) {
-            if (legalList.contains(a))
-                n = Arrays.asList(mystr).indexOf(a);
-        }
-        System.out.println(n);
-        System.out.println(n);
+        List<String> myStrList = new ArrayList<>();
+        myStrList = Arrays.asList(mystr);
+        if (myStrList.contains("-i"))
+            System.out.println("word after -i : " + getNextWord(string, "-i"));
+        if (myStrList.contains("-H"))
+            System.out.println("word after -H or --help : " + getNextWord(string, "-H"));
     }
 
     public static void duplicated(String string) {
         String[] mystr = string.split(" ");
         int i, k;
+        System.out.println(mystr.length);
+        String str = "";
         for (i = 0; i < mystr.length; ++i)
             for (k = 0; k < i; ++k)
-                if (mystr[i].equals(mystr[k]) && legalList.contains(mystr[k]))
-                    System.out.println(mystr[k]);
+                if (mystr[i].equals(mystr[k]) && legalList.contains(mystr[k])) {
+                    if (have(str, mystr[k]))
+                        str = str + mystr[k] + "/";
+                }
+        System.out.println("you use " + str + " more than one time");
     }
 
+    public static Boolean have(String string, String myStr) {
+        String[] myStringsArr = string.split("/");
+        List<String> myStringList = new ArrayList<>();
+        myStringList = Arrays.asList(myStringsArr);
+        return !myStringList.contains(myStr);
+    }
 }
