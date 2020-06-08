@@ -14,7 +14,8 @@ import java.util.regex.Pattern;
 
 public class hello {
     static RE mailValid;
-    static String[] legalArgs = {"-M", "--method", "-H", "--headers", "-i", "-h", "--help", "-O", "--output", "-S", "--save", "-d", "--data", "list", "create", "fire"};
+    static String[] legalArgs = {"-M", "--method", "-H", "--headers", "-i", "-h", "--help", "-O", "--output", "-S", "--save", "-d", "--data",
+            "list", "create", "fire", "--json", "-j", "--upload"};
     static List<String> legalList = Arrays.asList(legalArgs);
     static String[] methods = {"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"};
     static List<String> methodsList = Arrays.asList(methods);
@@ -55,13 +56,6 @@ public class hello {
         return containedUrls.size();
     }
 
-    public void checkNext(String string, String word1) {
-        String[] mystr = string.split(" ");
-        List<String> myStrList = Arrays.asList(mystr);
-        if (myStrList.contains(word1)) ;
-
-    }
-
     static public String replacer(String string) {
         string = string.replaceAll(" --headers ", " -H ");
         string = string.replaceAll(" --method ", " -M ");
@@ -69,6 +63,7 @@ public class hello {
         string = string.replaceAll(" --save ", " -S ");
         string = string.replaceAll(" --data ", " -d ");
         string = string.replaceAll(" --help ", " -h ");
+        string = string.replaceAll(" --json ", " -j ");
         return string;
     }
 
@@ -97,31 +92,44 @@ public class hello {
         duplicated(string);
         url = extractUrls(string);
         System.out.println("url : " + url);
+        if(url!=null)
         getWords(string);
+        else
+            System.out.println("type url first plz  ");
         //System.out.println("new word : "+getNextWord(string,"-i"));
     }
 
     public static void getWords(String string) {
         String[] mystr = string.split(" ");
         List<String> myStrList = new ArrayList<>();
-        myStrList = Arrays.asList(mystr);
-        if (myStrList.contains("-i"))
-            System.out.println("word after -i : " + getNextWord(string, "-i"));
-        if (myStrList.contains("-H"))
-            System.out.println("word after -H or --help : " + getNextWord(string, "-H"));
+        String wordsAfterArgs[] = {"", "", "", "", ""};
+        String argsName[] = {"json : ", "output : ", "upload : ", "headers : ", "method : "};
+
+        wordsAfterArgs[0] = getNextWord(string, "-j");
+        wordsAfterArgs[1] = getNextWord(string, "-O");
+        wordsAfterArgs[2] = getNextWord(string, "--upload");
+        wordsAfterArgs[3] = getNextWord(string, "-H");
+        wordsAfterArgs[4] = getNextWord(string, "-M");
+        for (int i = 0; i < 5; i++) {
+            System.out.print(argsName[i]);
+            System.out.println(wordsAfterArgs[i]);
+        }
     }
 
     public static void duplicated(String string) {
-        String[] mystr = string.split(" ");
+        String[] myStr = string.split(" ");
         int i, k;
-        System.out.println(mystr.length);
+        System.out.println(myStr.length);
         String str = "";
-        for (i = 0; i < mystr.length; ++i)
+        for (i = 0; i < myStr.length; ++i)
             for (k = 0; k < i; ++k)
-                if (mystr[i].equals(mystr[k]) && legalList.contains(mystr[k])) {
-                    if (have(str, mystr[k]))
-                        str = str + mystr[k] + "/";
+                if (myStr[i].equals(myStr[k]) && legalList.contains(myStr[k])) {
+                    if (have(str, myStr[k]))
+                        str = str + myStr[k] + "/";
                 }
+        if (str.length() > 0)
+            str = str.substring(0, str.length() - 1);
+
         System.out.println("you use " + str + " more than one time");
     }
 
@@ -130,5 +138,9 @@ public class hello {
         List<String> myStringList = new ArrayList<>();
         myStringList = Arrays.asList(myStringsArr);
         return !myStringList.contains(myStr);
+    }
+    public static String nullHandling(String string , int i)
+    {
+
     }
 }
