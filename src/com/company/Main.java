@@ -9,6 +9,8 @@ public class Main {
 
     public static void main(String[] args) {
         try {
+            System.out.println(            "output_["+java.time.LocalDate.now()+"]"
+);
             FileOutputStream fout = new FileOutputStream("D:\\testout.txt");
             FileInputStream fin = new FileInputStream("1.png");
             FileInputStream k = new FileInputStream("D:\\testout.txt");
