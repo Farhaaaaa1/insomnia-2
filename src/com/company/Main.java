@@ -1,22 +1,21 @@
 package com.company;
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
-
+import java.net.http.HttpClient;
+import java.nio.file.Paths;
+import java.util.Random;
+import java.net.HttpURLConnection;
 public class Main {
 
     public static void main(String[] args) {
         try {
-            System.out.println(            "output_["+java.time.LocalDate.now()+"]"
-);
+           // new Request();
             FileOutputStream fout = new FileOutputStream("D:\\testout.txt");
             FileInputStream fin = new FileInputStream("1.png");
             FileInputStream k = new FileInputStream("D:\\testout.txt");
             FileReader fileReader = new FileReader("D:\\testout.txt");
-
-
             FileWriter fileWriter = new FileWriter("D:\\testout.txt",true);
             FileWriter fileWriter1 = new FileWriter("D:\\testout.txt",true);
             fileWriter.write("jchsdijchjksdbc");

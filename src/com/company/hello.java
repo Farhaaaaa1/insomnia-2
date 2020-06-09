@@ -1,10 +1,9 @@
 package com.company;
 
-import com.sun.org.apache.regexp.internal.RE;
-import com.sun.tools.javac.util.ArrayUtils;
 
 import javax.print.DocFlavor;
 import java.io.File;
+import java.lang.reflect.Array;
 import java.net.FileNameMap;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -18,21 +17,32 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class hello {
-    static RE mailValid;
-    static String[] legalArgs = {"-M", "--method", "-H", "--headers", "-i", "-h", "--help", "-O", "--output", "-S", "--save", "-d", "--data",
+    private ArrayList<String> allThing = new ArrayList<>();
+    private final String[] legalArgs = {"-M", "--method", "-H", "--headers", "-i", "-h", "--help", "-O", "--output", "-S", "--save", "-d", "--data",
             "list", "create", "fire", "--json", "-j", "--upload"};
-    static List<String> legalList = Arrays.asList(legalArgs);
+    private final List<String> legalList = Arrays.asList(legalArgs);
 
-    static String[] methods = {"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"};
+    private final String[] methods = {"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"};
 
-    static List<String> methodsList = Arrays.asList(methods);
+    private final List<String> methodsList = Arrays.asList(methods);
 
-    public static void main(String[] args) {
-        while (true) {
+    public hello() {
+        String url;
+       // while (true) {
             Scanner input = new Scanner(System.in);
             String string = input.nextLine();
-            amadeSazi(string);
+            string = amadeSazi(string);
+            url = extractUrls(string);
+            allThing.add(url);
+            System.out.println("url : " + url);
+           // if (duplicated(string))
+              //  break;
+            getWords(string);
         }
+   // }
+
+    public static void main(String[] args) {
+
     }
 
     public static String extractUrls(String text) {
@@ -74,7 +84,7 @@ public class hello {
         return string;
     }
 
-    static public String getNextWord(String string, String word) {
+    public String getNextWord(String string, String word) {
         String[] mystr = string.split(" ");
         int index;
         List<String> myStrList = Arrays.asList(mystr);
@@ -88,27 +98,19 @@ public class hello {
     }
 
 
-    static public void amadeSazi(String string) {
-        String url;
+    static public String amadeSazi(String string) {
         // replace 2 or more space to 1 space
         string = string.replaceAll("\\s{2,}", " ").trim();
         string = " " + string + " ";
         //System.out.println(string);
         string = replacer(string);
-        // removing sapces from first and last
+        // removing spaces from first and last
         string = string.substring(1, string.length() - 1);
-        //System.out.println(string);
-        if (duplicated(string)) {
-            url = extractUrls(string);
-            System.out.println("url : " + url);
-            //  if (url != null)
-            getWords(string);
-            // else
-            System.out.println("type url first plz  ");
-        }
+        System.out.println("type url first plz  ");
+        return string;
     }
 
-    public static void getWords(String string) {
+    public void getWords(String string) {
         String[] mystr = string.split(" ");
         Boolean key = true;
         List<String> myStrList = Arrays.asList(mystr);
@@ -120,7 +122,7 @@ public class hello {
         wordsAfterArgs[3] = getNextWord(string, "-H");
         wordsAfterArgs[4] = getNextWord(string, "-M");
         wordsAfterArgs[5] = getNextWord(string, "-d");
-        if (wordsAfterArgs[1]==null)
+        if (wordsAfterArgs[1] == null)
             wordsAfterArgs[1] = "output_[" + java.time.LocalDate.now() + "]";
         for (int i = 0; i < wordsAfterArgs.length; i++) {
             if (i == 0)
@@ -130,13 +132,16 @@ public class hello {
                         key = false;
                     }
             if (key) {
+                if (!myStrList.contains(argsName[1]))
+                    wordsAfterArgs[1] = null;
+                allThing.add(wordsAfterArgs[i]);
                 System.out.print(argsName[i] + " : ");
                 System.out.println(wordsAfterArgs[i]);
             }
         }
     }
 
-    public static Boolean duplicated(String string) {
+    public Boolean duplicated(String string) {
         int numberOfDuplicate = 0;
         String[] myStr = string.split(" ");
         int i, k;
@@ -152,21 +157,21 @@ public class hello {
         if (str.length() > 0)
             str = str.substring(0, str.length() - 1);
         if (numberOfDuplicate == 0)
-            return true;
+            return false;
         else {
             System.out.println("you use " + str + " more than one time");
-            return false;
+            return true;
         }
     }
 
-    public static Boolean have(String string, String myStr) {
+    public Boolean have(String string, String myStr) {
         String[] myStringsArr = string.split("/");
         List<String> myStringList = new ArrayList<>();
         myStringList = Arrays.asList(myStringsArr);
         return !myStringList.contains(myStr);
     }
 
-    public static Boolean checkFormat(String string, int i) {
+    public Boolean checkFormat(String string, int i) {
         switch (i) {
             case 0:
                 //  if (Pattern.matches(, string))
@@ -193,30 +198,13 @@ public class hello {
         return false;
     }
 
-    public static String nullHandling(String string, int i) {
-        switch (i) {
-            case 0:
-                break;
-            case 1:
-                // if ()
-                return "output_[" + java.time.LocalDate.now() + "]";
-            case 2:
-                break;
-            case 3:
-                break;
-            case 4:
-                return methods[0];
-        }
-        return null;
-    }
-
-    public static Boolean wordAfterArgs(String string) {
+    public Boolean wordAfterArgs(String string) {
         String[] myStringsArr = string.split(" ");
         String[] addAbleArgs = {"-j", "-O", "--upload", "-H", "-M", "-d"};
         List<String> myStringsList = Arrays.asList(myStringsArr);
         List<String> addAbleArgsList = Arrays.asList(addAbleArgs);
         for (int i = 1; i < myStringsArr.length; i++) {
-            if (myStringsArr[i].charAt(0) != '-') {
+            if (!legalList.contains(myStringsArr[i])) {
                 int index = myStringsList.indexOf(myStringsArr[i]) - 1;
                 if (!addAbleArgsList.contains(myStringsList.get(index)))
                     return false;
@@ -225,4 +213,7 @@ public class hello {
         return true;
     }
 
+    public ArrayList<String> getAllThing() {
+        return allThing;
+    }
 }

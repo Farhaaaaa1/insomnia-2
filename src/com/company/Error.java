@@ -1,7 +1,7 @@
 package com.company;
 
 public final class Error {
-    public  void errorList1(int i) {
+    public final void errorList1(int i) {
         switch (i) {
             case 0:
                 break;
