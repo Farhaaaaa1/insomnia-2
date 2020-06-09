@@ -122,5 +122,25 @@ public class Request {
         data = all.get(6);
     }
 
-
+    public HttpRequest.BodyPublisher ofMimeMultipartData(Map<String, String> ourData,  String bound) throws IOException {
+        var byteArrays = new ArrayList<byte[]>();
+        byte[] separator = ("--" + bound + "\r\nContent-Disposition: form-data; name=")
+                .getBytes(StandardCharsets.UTF_8);
+        for (Map.Entry<String, String> A : ourData.entrySet()) {
+            byteArrays.add(separator);
+            Path file = new File(A.getValue()).toPath();
+            if (Files.exists(file)) {
+              //  var path = file;
+                String mimeType = Files.probeContentType(file);
+                byteArrays.add(("\"" + A.getKey() + "\"; filename=\"" + file.getFileName() + "\"\r\nContent-Type: " + mimeType + "\r\n\r\n")
+                        .getBytes(StandardCharsets.UTF_8));
+                byteArrays.add(Files.readAllBytes(file));
+                byteArrays.add("\r\n".getBytes(StandardCharsets.UTF_8));
+            } else {
+                byteArrays.add(("\"" + A.getKey() + "\"\r\n\r\n" + A.getValue() + "\r\n").getBytes(StandardCharsets.UTF_8));
+            }
+        }
+        byteArrays.add(  (  "--"+ bound +"--"  ).getBytes( StandardCharsets.UTF_8 ) );
+        return HttpRequest.BodyPublishers.ofByteArrays(byteArrays);
+    }
 }
