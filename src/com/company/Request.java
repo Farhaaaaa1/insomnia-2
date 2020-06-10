@@ -143,6 +143,12 @@ public class Request {
         }
         return request;
     }
+    public void getRespons(HttpRequest req) {
+        client = HttpClient.newBuilder().followRedirects(
+                !fieldList.getOurArgs().contains("-f") ? HttpClient.Redirect.NEVER :
+                        HttpClient.Redirect.ALWAYS).connectTimeout(Duration.ofSeconds(25))
+                .version(HttpClient.Version.HTTP_1_1).build();
+    }
     public String getUrl() {
         return url;
     }
