@@ -149,6 +149,25 @@ public class Request {
                         HttpClient.Redirect.ALWAYS).connectTimeout(Duration.ofSeconds(25))
                 .version(HttpClient.Version.HTTP_1_1).build();
     }
+    public void sendRequest() {
+        HttpResponse<byte[]> response = null;
+        try {
+            long T = System.currentTimeMillis();
+            response = client.send(getRequest(), HttpResponse.BodyHandlers.ofByteArray());
+            long T1 = System.currentTimeMillis();
+            String time = String.valueOf(T1 - T);
+            byte[] body = response.body();
+            float transfer = response.body().length/1024f;
+            String transferByte = String.valueOf(transfer)+" KB";
+            int statusCode = response.statusCode();
+            if (fieldList.getOurArgs().contains("-H")) {
+                HttpHeaders header = response.headers();
+            }
+            System.out.println("time : "+time +" transferres byte : "+transferByte+" body : " +body + " headers : "+ header);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     public String getUrl() {
         return url;
     }
