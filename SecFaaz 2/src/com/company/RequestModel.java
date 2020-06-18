@@ -1,13 +1,12 @@
 package com.company;
 
 
-import java.io.File;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,30 +16,37 @@ import java.util.regex.Pattern;
  * and after this class we give command to another class to
  * create request .
  */
-public class hello {
+public class RequestModel implements Serializable {
+    private Boolean save = false;
+    private Boolean saveBody = false;
+    private Boolean sendable = false;
     private ArrayList<String> allThing = new ArrayList<>();
     private ArrayList<String> ourArgs = new ArrayList<>();
-    private final String[] legalArgs = {"-M", "--method", "-H", "--headers", "-i", "-h", "--help", "-O", "--output", "-S", "--save", "-d", "--data",
-            "list", "create", "fire", "--json", "-j", "--upload"};
+    private final String[] legalArgs = {"-M", "--method", "-H", "--headers", "-i", "-h", "--help", "-O", "--output", "-S", "--save", "-d", "--data", // untill index 12
+            "list", "create", "fire", "--json", "-j", "--upload","-f"};
     private final List<String> legalList = Arrays.asList(legalArgs);
-
+    private String url;
     private final String[] methods = {"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"};
 
     private final List<String> methodsList = Arrays.asList(methods);
 
-    public hello() {
-        while (true) {
-            String url;
-            Scanner input = new Scanner(System.in);
-            String string = input.nextLine();
-            string = convertToStandard(string);
-            url = extractUrls(string);
-            allThing.add(url);
-            System.out.println("url : " + url);
-            if (!duplicated(string)) {
-                if (getWords(string))
-                break;
-            }
+    public RequestModel(String string) {
+        string = convertToStandard(string);
+        String[] firstString = string.split(" ");
+        addArgs(string);
+        url = extractUrls(string);
+        System.out.println(url);
+        String string1 = " " + string + " ";
+        allThing.add(url);
+        savingPar(string1);
+        if (!duplicated(string) && extractNumberOfUrls(string)) {
+            if (firstString[0] != null && firstString[0].equals(extractUrls(string))) {
+                if (wordAfterArgs(string) && getWords(string)) {
+                    System.out.println("mission complete boss");
+                    sendable = true;
+                }
+            } else
+                Error.errorList1(8);
         }
     }
 
@@ -51,19 +57,18 @@ public class hello {
      * @return we return the url code
      */
     public static String extractUrls(String text) {
-        if (extractNumberOfUrls(text) == 1) {
-            List<String> containedUrls = new ArrayList<String>();
-            String urlRegex;
-            urlRegex = "((https?|ftp|gopher|telnet|file):((//)|(\\\\))+[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]*)";
-            Pattern pattern = Pattern.compile(urlRegex, Pattern.CASE_INSENSITIVE);
-            Matcher urlMatcher = pattern.matcher(text);
-            while (urlMatcher.find()) {
-                containedUrls.add(text.substring(urlMatcher.start(0),
-                        urlMatcher.end(0)));
-            }
-            return containedUrls.get(0);
+        List<String> containedUrls = new ArrayList<String>();
+        String urlRegex;
+        urlRegex = "((https?|ftp|gopher|telnet|file):((//)|(\\\\))+[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]*)";
+        Pattern pattern = Pattern.compile(urlRegex, Pattern.CASE_INSENSITIVE);
+        Matcher urlMatcher = pattern.matcher(text);
+        while (urlMatcher.find()) {
+            containedUrls.add(text.substring(urlMatcher.start(0),
+                    urlMatcher.end(0)));
         }
-        return null;
+        if (containedUrls.size() != 0)
+            return containedUrls.get(0);
+        else return null;
     }
 
     /**
@@ -74,7 +79,7 @@ public class hello {
      * @param text our command
      * @return number of url
      */
-    public static int extractNumberOfUrls(String text) {
+    public boolean extractNumberOfUrls(String text) {
         List<String> containedUrls = new ArrayList<String>();
         String urlRegex = "((https?|ftp|gopher|telnet|file):((//)|(\\\\))+[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]*)";
         Pattern pattern = Pattern.compile(urlRegex, Pattern.CASE_INSENSITIVE);
@@ -83,7 +88,12 @@ public class hello {
             containedUrls.add(text.substring(urlMatcher.start(0),
                     urlMatcher.end(0)));
         }
-        return containedUrls.size();
+        if (containedUrls.size() == 1)
+            return true;
+        else {
+            Error.errorList1(7);
+            return false;
+        }
     }
 
     /**
@@ -107,6 +117,7 @@ public class hello {
     /**
      * in this method we get the word wich is
      * after the our given word
+     *
      * @param string our command
      * @param word   our given word that we want to get word after this word
      * @return word after our given word
@@ -126,6 +137,7 @@ public class hello {
 
     /**
      * here we convert our command to standard form
+     *
      * @param string our command
      * @return our command but in new format
      */
@@ -137,44 +149,56 @@ public class hello {
         string = replacer(string);
         // removing spaces from first and last
         string = string.substring(1, string.length() - 1);
-        System.out.println("type url first plz  ");
         return string;
     }
 
     /**
-     * here we get what we put to the
-     * @param string
+     * here we get what we get word that we type after addable args
+     *
+     * @param string our command
      */
     public Boolean getWords(String string) {
+        Date date = Calendar.getInstance().getTime();
+        DateFormat dateFormat = new SimpleDateFormat("yyyy.mm.dd hh.mm.ss");
+        String strDate = dateFormat.format(date);
         String[] mystr = string.split(" ");
         Boolean key = true;
         List<String> myStrList = Arrays.asList(mystr);
         String wordsAfterArgs[] = {"", "", "", "", "", ""};
         String argsName[] = {"-j", "-O", "--upload", "-H", "-M", "--data"};
         wordsAfterArgs[0] = getNextWord(string, "-j");
-        wordsAfterArgs[1] = getNextWord(string, "-O"); // output 1
+        wordsAfterArgs[1] = getNextWord(string, "-O");
         wordsAfterArgs[2] = getNextWord(string, "--upload");
-        wordsAfterArgs[3] = getNextWord(string, "-H"); // header 2
-        wordsAfterArgs[4] = getNextWord(string, "-M"); // method 3
+        wordsAfterArgs[3] = getNextWord(string, "-H");
+        wordsAfterArgs[4] = getNextWord(string, "-M");
         wordsAfterArgs[5] = getNextWord(string, "-d");
-        if (wordsAfterArgs[1] == null)
-            wordsAfterArgs[1] = "output_[" + java.time.LocalDate.now() + "]";
-        System.out.println("inja 1");
+        if (wordsAfterArgs[4] == null)
+            wordsAfterArgs[4] = methods[0];
         for (int j = 0; j < wordsAfterArgs.length; j++)
             if (!checkFormat(wordsAfterArgs[j], argsName[j])) {
-                new Error().errorList1(j);
-                key = false; }
+                Error.errorList1(j);
+                key = false;
+            }
+        if (wordsAfterArgs[1] == null)
+            wordsAfterArgs[1] = "output_[" + strDate + "]";
         if (key) {
             if (!myStrList.contains(argsName[1]))
                 wordsAfterArgs[1] = null;
-            allThing.add(wordsAfterArgs[1]);
-            allThing.add(wordsAfterArgs[3]);
-            System.out.println("here");
-            allThing.add(wordsAfterArgs[4]);
-            allThing.add(addToMessageBody(wordsAfterArgs[0], wordsAfterArgs[2], wordsAfterArgs[5])); }
-        System.out.println(key);
-        return key; }
+            allThing.add(wordsAfterArgs[1]); // 1 -> output
+            allThing.add(wordsAfterArgs[3]); // 2 -> header
+            allThing.add(wordsAfterArgs[4]); // 3 -> method
+            allThing.add(addToMessageBody(wordsAfterArgs[0], wordsAfterArgs[2], wordsAfterArgs[5]));
+        }
+        return key;
+    }
 
+    /**
+     * if we use one or more than one arg more than one time here we show
+     * an error
+     *
+     * @param string our command
+     * @return boolean to show its duplicated or not
+     */
     public Boolean duplicated(String string) {
         int numberOfDuplicate = 0;
         String[] myStr = string.split(" ");
@@ -198,6 +222,12 @@ public class hello {
         }
     }
 
+    /**
+     * this method is absloutly unneccery
+     *
+     * @param string our command
+     * @return if we count it or not
+     */
     public Boolean have(String string, String myStr) {
         String[] myStringsArr = string.split("/");
         List<String> myStringList = new ArrayList<>();
@@ -205,12 +235,19 @@ public class hello {
         return !myStringList.contains(myStr);
     }
 
+    /**
+     * in this method we check what we type (format checking)
+     *
+     * @param string what we write (our command)
+     * @param name   name of our argomans
+     * @return return boolean to get our formats are true or not
+     */
     public Boolean checkFormat(String string, String name) {
         switch (name) {
             case "-j":
                 return true;
             case "-O":
-                if (string.equals("output_[" + java.time.LocalDate.now() + "]") || Pattern.matches("(\\w+[.]\\w+)", string))
+                if (string == null||Pattern.matches("(\\w+[.]\\w+)", string) )
                     return true;
             case "--upload":
                 // -d
@@ -232,6 +269,12 @@ public class hello {
         return false;
     }
 
+    /**
+     * here we check our word(not args) to before them we have to have addable args
+     *
+     * @param string our command
+     * @return bolean we have this or not
+     */
     public Boolean wordAfterArgs(String string) {
         String[] myStringsArr = string.split(" ");
         String[] addAbleArgs = {"-j", "-O", "--upload", "-H", "-M", "-d"};
@@ -240,13 +283,23 @@ public class hello {
         for (int i = 1; i < myStringsArr.length; i++) {
             if (!legalList.contains(myStringsArr[i])) {
                 int index = myStringsList.indexOf(myStringsArr[i]) - 1;
-                if (!addAbleArgsList.contains(myStringsList.get(index)))
+                if (!addAbleArgsList.contains(myStringsList.get(index))) {
+                    Error.errorList1(6);
                     return false;
+                }
             }
         }
         return true;
     }
 
+    /**
+     * here we create our messege body
+     *
+     * @param json   json mode
+     * @param upload --upload mode
+     * @param data   form data mode
+     * @return our messege body
+     */
     public String addToMessageBody(String json, String upload, String data) {
         String messegeBody = "JSON=" + json;
         if (upload != null) {
@@ -261,17 +314,56 @@ public class hello {
     public ArrayList<String> getAllThing() {
         return allThing;
     }
+
     public ArrayList<String> getOurArgs() {
         return ourArgs;
     }
 
-    public void addArgs(String string)
-    {
+    /**
+     * in this method we first find our argoman and next we put it
+     * into the ourArgs list to use it in other class
+     * @param string
+     */
+    public void addArgs(String string) {
         String[] ourArgsArr = string.split(" ");
-        for (String A:
-             ourArgsArr) {
-            if(legalList.contains(A))
+        for (String A :
+                ourArgsArr) {
+            if (legalList.contains(A))
                 ourArgs.add(A);
         }
     }
+
+    /**
+     * here we got that we want to save or not
+     *
+     * @param string our command that we type it on the terminal
+     */
+    public void savingPar(String string) {
+        if (string.contains(" " + legalArgs[9] + " "))
+            save = true;
+        if (string.contains(" " + legalArgs[7] + " "))
+            saveBody = true;
+    }
+
+    // getter and settttters
+    public String getUrl() {
+        return url;
+    }
+
+    public ArrayList<String> getLegalArgs() {
+        return allThing;
+    }
+
+    public Boolean getSave() {
+        return save;
+    }
+
+    public Boolean getSaveBody() {
+        return saveBody;
+    }
+
+    public Boolean getSendable() {
+        return sendable;
+    }
 }
+

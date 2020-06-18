@@ -1,7 +1,7 @@
 package com.company;
 
-public final class Error {
-    public final void errorList1(int i) {
+public  final class Error {
+    public static final void errorList1(int i) {
         switch (i) {
             case 0:
                 break;
@@ -19,6 +19,16 @@ public final class Error {
                 break;
             case 5:
                 System.out.println("you'r format for --data/-d it's not true");
+                break;
+            case 6:
+                System.out.println("you'r format is  not true");
+                break;
+            case 7:
+                System.out.println("you have to use url just one time");
+                break;
+
+            case 8:
+                System.out.println("your first word is not URL ");
                 break;
         }
     }
